@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verkabelung Bremsdreirad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: sachlicher Werkstatt-Schaltplan, wie ein laminiertes Verdrahtungsblatt neben dem Lötkolben
+   IDEA: Bauteil-Schaltplan mit farbcodierten Leitungen, Farbe = Spannung/Funktion
+   PICTURE: das Verdrahtungsschema selbst, groß, oben
+   COLOUR and TYPE: weißes Blatt, Leitungsfarben tragen die Bedeutung; Schibsted Grotesk
+   LAYOUT: Titel, Schema (auf dem Handy waagerecht scrollbar), Legende, Warnungen, Verbindungslisten */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#14171c);--ink:light-dark(#16191f,#e9ecef);--mu:light-dark(#6b7280,#9aa3ad);--gnd:light-dark(#1f2328,#dee2e6);--line:light-dark(#e6e8eb,#2a2f37);--warn:light-dark(#fff4e0,#3a2a10)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Schibsted Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,4vw,48px) max(4vw,16px);max-width:1240px;margin:auto}
+h1{font-size:clamp(30px,4.5vw,46px);line-height:1.05;margin:0 0 8px;font-weight:800;text-wrap:balance}
+.lead{color:var(--mu);margin:0 0 18px;max-width:70ch}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;padding:12px}
+.scroll svg{display:block;width:100%;min-width:880px;height:auto}
+.hint{font-size:13px;color:var(--mu);margin:6px 2px 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:16px 0 0;padding:0;list-style:none;font-size:14px}
+.legend li{display:flex;align-items:center;gap:8px}.legend i{width:28px;height:4px;border-radius:2px;display:inline-block}
+.warn{background:var(--warn);border-radius:14px;padding:16px 20px;margin:22px 0}
+.warn h2{margin:0 0 6px;font-size:18px}.warn ul{margin:0;padding-left:20px}.warn li{margin:3px 0}
+h3{font-size:20px;margin:28px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:15px}th{text-align:left;color:var(--mu);font-weight:600;font-size:13px;padding:6px 8px;border-bottom:2px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}td:first-child{white-space:nowrap}
+@media(max-width:600px){table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:5.5em;margin-inline-start:-6em;color:var(--mu);font-size:13px}.stack td:empty{display:none}}
+</style><script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script></head><body>
+<main class="band">
+<h1>Verkabelung Bremsdreirad</h1>
+<p class="lead">ESP32, TMC2209, NEMA17, zwei Hallsensoren und Akku – passend zum Code im Projekt <i>bremsdreirad-esp32</i>. Das Schema zeigt die elektrischen Verbindungen, nicht die echte Lage der Pins auf den Platinen.</p>
+<figure style="margin:0"><div class="scroll"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 840" role="img" aria-label="Verdrahtungsschema: Akku, Step-down, ESP32, TMC2209, NEMA17 und zwei Hallsensoren" font-family="inherit">
+<rect x="900" y="30" width="190" height="90" rx="10" fill="#364fc7"/>
+<text x="995.0" y="54" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">Akku 6S LiPo</text>
+<text x="995.0" y="71" font-size="11.5" text-anchor="middle" font-weight="400" fill="#fff">22,2 V · XT60</text>
+<circle cx="900" cy="58" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="910" y="63" font-size="14" text-anchor="start" font-weight="700" fill="#fff">+</text>
+<circle cx="900" cy="92" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="910" y="97" font-size="14" text-anchor="start" font-weight="700" fill="#fff">−</text>
+<polyline points="900,58 868,58" fill="none" stroke="#e03131" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="864" cy="58" r="3.5" fill="currentColor"/><circle cx="826" cy="58" r="3.5" fill="currentColor"/>
+<line x1="864" y1="58" x2="830" y2="42" stroke="currentColor" stroke-width="2.4"/>
+<text x="845" y="30" font-size="11.5" text-anchor="middle" font-weight="600" fill="currentColor">Schalter</text>
+<polyline points="826,58 420,58" fill="none" stroke="#e03131" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="900,92 420,92" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="600" y="50" font-size="11.5" text-anchor="middle" font-weight="600" fill="#e03131">Akku + (nach Schalter)</text>
+<text x="600" y="108" font-size="11.5" text-anchor="middle" font-weight="600" fill="currentColor">GND</text>
+<rect x="280" y="30" width="140" height="104" rx="10" fill="#e8590c"/>
+<text x="350.0" y="54" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">Step-down</text>
+<text x="350" y="124" font-size="11" text-anchor="middle" font-weight="600" fill="#fff">auf 5,0 V einstellen!</text>
+<circle cx="420" cy="58" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<circle cx="420" cy="92" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<circle cx="280" cy="58" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<circle cx="280" cy="92" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="412" y="76" font-size="10.5" text-anchor="end" font-weight="600" fill="#fff">IN</text>
+<text x="288" y="76" font-size="10.5" text-anchor="start" font-weight="600" fill="#fff">OUT</text>
+<rect x="60" y="140" width="160" height="540" rx="10" fill="#1b263b"/>
+<text x="140.0" y="164" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">ESP32</text>
+<text x="140.0" y="181" font-size="11.5" text-anchor="middle" font-weight="400" fill="#fff">DevKit V1</text>
+<circle cx="220" cy="200" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="204" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">VIN (5 V)</text>
+<circle cx="220" cy="232" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="236" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GND</text>
+<circle cx="220" cy="330" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="334" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 27</text>
+<circle cx="220" cy="362" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="366" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 17 (TX2)</text>
+<circle cx="220" cy="394" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="398" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 16 (RX2)</text>
+<circle cx="220" cy="434" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="438" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 25</text>
+<circle cx="220" cy="466" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="470" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 26</text>
+<circle cx="220" cy="526" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="530" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 32</text>
+<circle cx="220" cy="566" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="570" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GPIO 33</text>
+<circle cx="220" cy="606" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="610" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">3V3</text>
+<circle cx="220" cy="642" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="210" y="646" font-size="12.5" text-anchor="end" font-weight="600" fill="#fff">GND</text>
+<polyline points="280,58 240,58 240,200 220,200" fill="none" stroke="#f08c00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="240" cy="58" r="4.5" fill="#f08c00"/>
+<polyline points="280,92 260,92 260,232 220,232" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="240,58 30,58 30,770 640,770" fill="none" stroke="#f08c00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="36" y="400" font-size="12" text-anchor="start" font-weight="700" fill="#f08c00">5 V</text>
+<rect x="520" y="262" width="180" height="290" rx="10" fill="#5c940d"/>
+<text x="610.0" y="286" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">TMC2209</text>
+<circle cx="520" cy="300" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="304" font-size="12" text-anchor="start" font-weight="600" fill="#fff">EN</text>
+<circle cx="520" cy="330" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="334" font-size="12" text-anchor="start" font-weight="600" fill="#fff">MS1</text>
+<circle cx="520" cy="360" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="364" font-size="12" text-anchor="start" font-weight="600" fill="#fff">MS2</text>
+<circle cx="520" cy="390" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="394" font-size="12" text-anchor="start" font-weight="600" fill="#fff">PDN_UART</text>
+<circle cx="520" cy="420" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="424" font-size="12" text-anchor="start" font-weight="600" fill="#fff">PDN</text>
+<circle cx="520" cy="450" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="454" font-size="12" text-anchor="start" font-weight="600" fill="#fff">CLK</text>
+<circle cx="520" cy="480" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="484" font-size="12" text-anchor="start" font-weight="600" fill="#fff">STEP</text>
+<circle cx="520" cy="510" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="530" y="514" font-size="12" text-anchor="start" font-weight="600" fill="#fff">DIR</text>
+<circle cx="700" cy="300" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="304" font-size="12" text-anchor="end" font-weight="600" fill="#fff">VM</text>
+<circle cx="700" cy="330" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="334" font-size="12" text-anchor="end" font-weight="600" fill="#fff">GND</text>
+<circle cx="700" cy="360" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="364" font-size="12" text-anchor="end" font-weight="600" fill="#fff">2B</text>
+<circle cx="700" cy="390" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="394" font-size="12" text-anchor="end" font-weight="600" fill="#fff">2A</text>
+<circle cx="700" cy="420" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="424" font-size="12" text-anchor="end" font-weight="600" fill="#fff">1A</text>
+<circle cx="700" cy="450" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="454" font-size="12" text-anchor="end" font-weight="600" fill="#fff">1B</text>
+<circle cx="700" cy="480" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="484" font-size="12" text-anchor="end" font-weight="600" fill="#fff">VDD</text>
+<circle cx="700" cy="510" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="690" y="514" font-size="12" text-anchor="end" font-weight="600" fill="#fff">GND</text>
+<polyline points="220,330 480,330 480,300 520,300" fill="none" stroke="#1971c2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="300" y="324" font-size="11.5" text-anchor="middle" font-weight="600" fill="#1971c2">EN</text>
+<polyline points="220,362 310.0,362" fill="none" stroke="#0c8599" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="350.0,362 440,362" fill="none" stroke="#0c8599" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="310.0" y="354" width="40" height="16" rx="3" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="330.0" y="349" font-size="11.5" text-anchor="middle" font-weight="600" fill="currentColor">1 kΩ</text>
+<polyline points="440,362 460,362 460,390" fill="none" stroke="#0c8599" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="220,394 520,394" fill="none" stroke="#0c8599" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="460" cy="394" r="4.5" fill="#0c8599"/>
+<polyline points="460,390 460,394" fill="none" stroke="#0c8599" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="300" y="384" font-size="11.5" text-anchor="middle" font-weight="600" fill="#0c8599">UART (ein Draht)</text>
+<polyline points="220,434 440,434 440,480 520,480" fill="none" stroke="#1971c2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="220,466 420,466 420,510 520,510" fill="none" stroke="#1971c2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="300" y="428" font-size="11.5" text-anchor="middle" font-weight="600" fill="#1971c2">STEP</text>
+<text x="300" y="460" font-size="11.5" text-anchor="middle" font-weight="600" fill="#1971c2">DIR</text>
+<polyline points="520,330 500,330 500,368" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="520,360 500,360" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="500" cy="360" r="4.5" fill="var(--gnd)"/>
+<line x1="482" y1="370" x2="518" y2="370" stroke="currentColor" stroke-width="2"/>
+<line x1="489" y1="375" x2="511" y2="375" stroke="currentColor" stroke-width="2"/>
+<line x1="495" y1="380" x2="505" y2="380" stroke="currentColor" stroke-width="2"/>
+<text x="514" y="428" font-size="10.5" text-anchor="end" font-weight="400" fill="var(--mu)">n.c.</text>
+<text x="514" y="458" font-size="10.5" text-anchor="end" font-weight="400" fill="var(--mu)">n.c.</text>
+<polyline points="700,300 750,300 750,58" fill="none" stroke="#e03131" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="750" cy="58" r="4.5" fill="#e03131"/>
+<polyline points="700,330 800,330 800,92" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="800" cy="92" r="4.5" fill="var(--gnd)"/>
+<polyline points="750,200 768,200" fill="none" stroke="#e03131" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="782,200 800,200" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="750" cy="200" r="4.5" fill="#e03131"/>
+<circle cx="800" cy="200" r="4.5" fill="var(--gnd)"/>
+<line x1="768" y1="186" x2="768" y2="214" stroke="currentColor" stroke-width="2.4"/>
+<path d="M786 186 Q778 200 786 214" fill="none" stroke="currentColor" stroke-width="2.4"/>
+<text x="775" y="180" font-size="11.5" text-anchor="middle" font-weight="700" fill="currentColor">100 µF</text>
+<text x="775" y="232" font-size="10.5" text-anchor="middle" font-weight="400" fill="var(--mu)">+ links</text>
+<rect x="900" y="320" width="190" height="160" rx="10" fill="#495057"/>
+<text x="995.0" y="344" font-size="15" text-anchor="middle" font-weight="700" fill="#fff">NEMA17</text>
+<text x="995.0" y="361" font-size="11.5" text-anchor="middle" font-weight="400" fill="#fff">17HS4401</text>
+<polyline points="700,360 900,360" fill="none" stroke="#d6336c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="900" cy="360" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="910" y="364" font-size="12" text-anchor="start" font-weight="600" fill="#fff">B−</text>
+<polyline points="700,390 900,390" fill="none" stroke="#d6336c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="900" cy="390" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="910" y="394" font-size="12" text-anchor="start" font-weight="600" fill="#fff">B+</text>
+<polyline points="700,420 900,420" fill="none" stroke="#7048e8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="900" cy="420" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="910" y="424" font-size="12" text-anchor="start" font-weight="600" fill="#fff">A+</text>
+<polyline points="700,450 900,450" fill="none" stroke="#7048e8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="900" cy="450" r="4" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="910" y="454" font-size="12" text-anchor="start" font-weight="600" fill="#fff">A−</text>
+<text x="800" y="378" font-size="11.5" text-anchor="middle" font-weight="700" fill="#d6336c">Spule B</text>
+<text x="800" y="468" font-size="11.5" text-anchor="middle" font-weight="700" fill="#7048e8">Spule A</text>
+<polyline points="220,606 720,606 720,480 700,480" fill="none" stroke="#9c36b5" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="700,510 735,510 735,642 220,642" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="620" y="600" font-size="11.5" text-anchor="middle" font-weight="700" fill="#9c36b5">3,3 V</text>
+<text x="620" y="658" font-size="11.5" text-anchor="middle" font-weight="700" fill="currentColor">GND</text>
+<polyline points="220,526 380,526" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="220,566 300,566" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="300" y="690" width="60" height="34" rx="5" fill="#2b2b2b"/>
+<text x="330" y="712" font-size="11.5" text-anchor="middle" font-weight="700" fill="#fff">A3144</text>
+<text x="292" y="712" font-size="12.5" text-anchor="end" font-weight="700" fill="currentColor">Rampenende</text>
+<polyline points="312,724 312,770" fill="none" stroke="#f08c00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="312" cy="770" r="4.5" fill="#f08c00"/>
+<polyline points="330,724 330,800" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="330" cy="800" r="4.5" fill="var(--gnd)"/>
+<polyline points="348,690 348,670 300,670 300,566" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="308" y="740" font-size="9.5" text-anchor="end" font-weight="600" fill="var(--mu)">VCC</text>
+<text x="334" y="740" font-size="9.5" text-anchor="start" font-weight="600" fill="var(--mu)">GND</text>
+<text x="353" y="684" font-size="9.5" text-anchor="start" font-weight="600" fill="var(--mu)">OUT</text>
+<rect x="450" y="690" width="60" height="34" rx="5" fill="#2b2b2b"/>
+<text x="480" y="712" font-size="11.5" text-anchor="middle" font-weight="700" fill="#fff">A3144</text>
+<text x="442" y="712" font-size="12.5" text-anchor="end" font-weight="700" fill="currentColor">Exzenter</text>
+<polyline points="462,724 462,770" fill="none" stroke="#f08c00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="462" cy="770" r="4.5" fill="#f08c00"/>
+<polyline points="480,724 480,800" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="480" cy="800" r="4.5" fill="var(--gnd)"/>
+<polyline points="498,690 498,670 380,670 380,526" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="458" y="740" font-size="9.5" text-anchor="end" font-weight="600" fill="var(--mu)">VCC</text>
+<text x="484" y="740" font-size="9.5" text-anchor="start" font-weight="600" fill="var(--mu)">GND</text>
+<text x="503" y="684" font-size="9.5" text-anchor="start" font-weight="600" fill="var(--mu)">OUT</text>
+<circle cx="380" cy="526" r="4.5" fill="#2f9e44"/>
+<circle cx="300" cy="566" r="4.5" fill="#2f9e44"/>
+<polyline points="350,526 350,546.0" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="350,586.0 350,606" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="342" y="546.0" width="16" height="40" rx="3" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="363" y="570.0" font-size="11.5" text-anchor="start" font-weight="600" fill="currentColor"></text>
+<circle cx="350" cy="526" r="4.5" fill="#2f9e44"/>
+<circle cx="350" cy="606" r="4.5" fill="#9c36b5"/>
+<polyline points="270,566 270,566.0" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="270,606.0 270,606" fill="none" stroke="#2f9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="262" y="566.0" width="16" height="40" rx="3" fill="var(--bg)" stroke="currentColor" stroke-width="1.6"/>
+<text x="283" y="590.0" font-size="11.5" text-anchor="start" font-weight="600" fill="currentColor"></text>
+<circle cx="270" cy="566" r="4.5" fill="#2f9e44"/>
+<circle cx="270" cy="606" r="4.5" fill="#9c36b5"/>
+<text x="320" y="550" font-size="11" text-anchor="middle" font-weight="700" fill="currentColor">10 kΩ</text>
+<text x="258" y="592" font-size="11" text-anchor="end" font-weight="700" fill="currentColor">10k</text>
+<polyline points="735,642 760,642 760,800 300,800" fill="none" stroke="var(--gnd)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="735" cy="642" r="4.5" fill="var(--gnd)"/>
+<text x="560" y="818" font-size="11.5" text-anchor="middle" font-weight="700" fill="currentColor">GND</text>
+<text x="560" y="788" font-size="11.5" text-anchor="middle" font-weight="700" fill="#f08c00">5 V</text>
+</svg></div>
+<figcaption class="hint">Punkt = Verbindung, Kreuzung ohne Punkt = keine Verbindung. Auf dem Handy waagerecht wischen oder zoomen.</figcaption></figure>
+<ul class="legend">
+<li><i style="background:#e03131"></i>Akku + (22 V)</li><li><i style="background:#f08c00"></i>5 V</li><li><i style="background:#9c36b5"></i>3,3 V</li>
+<li><i style="background:var(--gnd)"></i>GND</li><li><i style="background:#1971c2"></i>STEP / DIR / EN</li><li><i style="background:#0c8599"></i>UART</li>
+<li><i style="background:#2f9e44"></i>Hallsensoren</li><li><i style="background:#7048e8"></i>Spule A</li><li><i style="background:#d6336c"></i>Spule B</li></ul>
+<section class="warn"><h2>Bevor Strom drauf kommt</h2><ul>
+<li><b>Step-down zuerst allein</b> am Akku auf 5,0 V einstellen, erst dann den ESP32 anschließen.</li>
+<li><b>Motor nie ab- oder anstecken</b>, solange der Akku dran ist – das zerstört den TMC2209.</li>
+<li><b>Hallsensoren an 5 V</b>, nicht an 3,3 V (A3144 braucht mind. 4,5 V). Die Pull-ups gehen aber an 3V3.</li>
+<li><b>Pinbeschriftung auf eurem TMC2209-Modul prüfen</b> – die Reihenfolge unterscheidet sich je nach Hersteller.</li>
+<li>A3144: flache, beschriftete Seite zu dir, Beine nach unten → <b>1 VCC, 2 GND, 3 OUT</b> (links nach rechts).</li>
+<li>Beim Flashen per USB darf der Akku angeschlossen sein; die Masse ist gemeinsam.</li>
+</ul></section>
+<h3>Stromversorgung</h3><table class="stack"><thead><tr><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead><tbody><tr><td><b>Akku +</b></td><td>Schalter → Step-down IN+ und TMC2209 VM</td><td>22,2 V (6S). Schalter in die Plus-Leitung</td></tr><tr><td><b>Akku −</b></td><td>Step-down IN−, TMC2209 GND (neben VM)</td><td>Masse der Leistungsseite</td></tr><tr><td><b>Step-down OUT+</b></td><td>ESP32 VIN, VCC beider A3144</td><td><b>Vorher ohne Last auf 5,0 V einstellen</b></td></tr><tr><td><b>Step-down OUT−</b></td><td>ESP32 GND</td><td>Gemeinsame Masse für alles</td></tr><tr><td><b>Elko 100 µF / 35 V</b></td><td>zwischen VM (+) und GND (−)</td><td>So nah wie möglich am Treiber, Polung beachten</td></tr></tbody></table><h3>ESP32 → TMC2209</h3><table class="stack"><thead><tr><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead><tbody><tr><td><b>GPIO 27</b></td><td>EN</td><td>LOW = Treiber an</td></tr><tr><td><b>GPIO 25</b></td><td>STEP</td><td></td></tr><tr><td><b>GPIO 26</b></td><td>DIR</td><td></td></tr><tr><td><b>GPIO 17 (TX2)</b></td><td>PDN_UART über 1 kΩ</td><td>Widerstand ist Pflicht</td></tr><tr><td><b>GPIO 16 (RX2)</b></td><td>PDN_UART direkt</td><td>beide Leitungen treffen sich am Pin</td></tr><tr><td><b>3V3</b></td><td>VDD (VIO)</td><td>Logikversorgung des Treibers</td></tr><tr><td><b>GND</b></td><td>GND (neben VDD)</td><td></td></tr><tr><td><b>–</b></td><td>MS1 und MS2 → GND</td><td>UART-Adresse 0</td></tr><tr><td><b>–</b></td><td>PDN, CLK</td><td>nicht anschließen</td></tr></tbody></table><h3>TMC2209 → NEMA17</h3><table class="stack"><thead><tr><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead><tbody><tr><td><b>1A / 1B</b></td><td>Spule A</td><td>Spulenpaar mit dem Multimeter suchen: ca. 1–3 Ω zwischen den beiden Drähten</td></tr><tr><td><b>2A / 2B</b></td><td>Spule B</td><td>Dreht der Motor falsch herum: ein Spulenpaar tauschen (oder DIR im Code)</td></tr></tbody></table><h3>Hallsensoren A3144</h3><table class="stack"><thead><tr><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead><tbody><tr><td><b>Bein 1 (VCC)</b></td><td>5 V</td><td>A3144 braucht mindestens 4,5 V – nicht an 3,3 V!</td></tr><tr><td><b>Bein 2 (GND)</b></td><td>GND</td><td></td></tr><tr><td><b>Bein 3 (OUT) Exzenter</b></td><td>GPIO 32 + 10 kΩ nach 3V3</td><td>Pull-up an 3,3 V schützt den ESP32</td></tr><tr><td><b>Bein 3 (OUT) Rampenende</b></td><td>GPIO 33 + 10 kΩ nach 3V3</td><td></td></tr></tbody></table>
+</main></body></html>
