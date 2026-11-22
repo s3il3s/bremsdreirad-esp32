@@ -80,7 +80,8 @@ void startRun(float hz) {
   if (!enabled) { stepper->enableOutputs(); enabled = true; }
   stepper->setAcceleration((int32_t)(accelHzPerS * STEPS_PER_REV));
   stepper->setSpeedInHz(sps(hz));
-  if (stepper->isRunningContinuously()) stepper->applySpeedAcceleration();
+  // laeuft schon im Dauerlauf -> nur neue Drehzahl uebernehmen, sonst neu starten
+  if (stepper->isRunning() && stepper->isRunningContinuously()) stepper->applySpeedAcceleration();
   else if (forward) stepper->runForward();
   else stepper->runBackward();
 }
@@ -97,7 +98,13 @@ String handleCommand(String line) {
   char buf[120];
 
   if (cmd == "stop") { stopSoft(); return "Bremst sanft ab."; }
-  if (cmd == "notstop") { sweepActive = false; stepper->forceStop(); return "Sofort gestoppt."; }
+  if (cmd == "notstop") {
+    sweepActive = false;
+    // forceStop() alleine sperrt in FastAccelStepper 2.x jeden weiteren Dauerlauf bis zum Reset.
+    // forceStopAndNewPosition() setzt den Rampengenerator dagegen sauber zurueck.
+    stepper->forceStopAndNewPosition(stepper->getCurrentPosition());
+    return "Sofort gestoppt.";
+  }
   if (cmd == "run") {
     sweepActive = false;
     startRun(freqHz);
@@ -106,7 +113,7 @@ String handleCommand(String line) {
   }
   if (cmd == "f" && !isnan(val)) {
     freqHz = constrain(val, 0.1f, 25.0f);
-    if (stepper->isRunningContinuously() && !sweepActive) startRun(freqHz);
+    if (stepper->isRunning() && stepper->isRunningContinuously() && !sweepActive) startRun(freqHz);
     snprintf(buf, sizeof buf, "Frequenz %.2f Hz.", freqHz); return buf;
   }
   if (cmd == "a" && !isnan(val)) {
@@ -127,7 +134,7 @@ String handleCommand(String line) {
     forward = !forward; return forward ? "Richtung: vorwaerts." : "Richtung: rueckwaerts.";
   }
   if (cmd == "j" && !isnan(val)) {
-    if (stepper->isRunningContinuously()) return "Laeuft gerade im Dauerlauf.";
+    if (stepper->isRunning() && stepper->isRunningContinuously()) return "Laeuft gerade im Dauerlauf.";
     if (!enabled) { stepper->enableOutputs(); enabled = true; }
     stepper->setSpeedInHz(STEPS_PER_REV);           // 1 U/s
     stepper->setAcceleration(STEPS_PER_REV * 4);

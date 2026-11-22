@@ -261,7 +261,8 @@ void handleCommand(String line) {
   cmd.toLowerCase();
 
   if (cmd == "stop") {
-    stepper->forceStop();
+    // forceStop() alleine sperrt in FastAccelStepper 2.x weitere Dauerlaeufe bis zum Reset
+    stepper->forceStopAndNewPosition(stepper->getCurrentPosition());
     runFinished = false;
     mode = Mode::IDLE; homed = false;
     out("Gestoppt. Position unsicher -> 'Bremse oeffnen' faehrt neu Referenz.\n");
