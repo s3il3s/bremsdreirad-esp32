@@ -1,0 +1,45 @@
+﻿Kategorie;Teil;Spezifikation;Menge;ca. € (gesamt);Wofür / Hinweis
+Bremse;Bremsscheibe;110 mm, Xiaomi M365, 5-Loch (Lochkreis ca. 42,5 mm), 1,8 mm dick;1;10;"Hinterrad; Lochkreis und Innenloch nachmessen"
+Bremse;Scheibenbremssattel, mechanisch;Xiaomi M365, seilbetätigt, inkl. Beläge;1;15;Bohrbild + Hebelposition messen und im Modell eintragen
+Bremse;Ersatz-Bremsbeläge;passend zum Sattel;1 Satz;5;Verschleiß bei vielen Versuchen
+Bremse;Druckfeder;außen ≤ 10 mm, 20–25 mm lang, mittelhart (Sortiment);1 Sortiment;8;Federhülse im Pleuel, bestimmt die Bremskraft
+Bremse;Gabelkopf M4;Modellbau, mit Bolzen;1;3;Gewindestange ↔ Sattelhebel
+Bremse;Gewindestange M4;Stahl, wird auf ca. 60 mm gekürzt;1;2;Pleuel → Hebel
+Lager & Achsen;Kugellager 608-2RS;8 × 22 × 7 mm;6;6;Je 2 pro Rad
+Lager & Achsen;Kugellager 6804-2RS;20 × 32 × 7 mm;1;4;Pleuelauge auf dem Exzenter
+Lager & Achsen;Sechskantschraube M8 × 100;Teilgewinde;1;1;Hinterachse
+Lager & Achsen;Sechskantschraube M8 × 50;Teilgewinde;2;1;Vorderachsen
+Lager & Achsen;Muttern M8;selbstsichernd (DIN 985) + normal;5;1;
+Lager & Achsen;Unterlegscheiben M8;DIN 125;10;1;Spiel an den Rädern ausgleichen
+Schrauben;Schrauben M5 × 12 + Muttern;liegen der Scheibe oft bei;5;2;"Bremsscheibe; Muttern von unten in die Taschen"
+Schrauben;Schrauben M4 × 12/16 + Muttern + Scheiben;Zylinderkopf DIN 912;ca. 30;6;Lochraster, Plattenverbindung, Halter
+Schrauben;Schrauben M3 × 8, flacher Kopf;DIN 7984;4;1;NEMA17 – Köpfe in Senkungen, sonst streift das Pleuel
+Schrauben;Schrauben M3 × 12 + Muttern;Zylinderkopf;2;1;Hallsensor-Arm
+Schrauben;Madenschraube M3 × 6 + Mutter M3;;1;1;Exzenter auf der Motorwelle
+Schrauben;Schrauben M2,5 × 6;selbstschneidend;4;1;Lochrasterplatine
+Antrieb & Elektronik;Schrittmotor NEMA17;z. B. 17HS4401 (40 mm, 1,7 A), 5-mm-D-Welle, mit Kabel;1;12;Treibt den Exzenter (bis 1200 U/min)
+Antrieb & Elektronik;Schrittmotortreiber TMC2209;StepStick-Modul mit Kühlkörper;1;6;
+Antrieb & Elektronik;Elko 100 µF / 35 V;;1;0,5;Direkt am Versorgungseingang des Treibers
+Antrieb & Elektronik;ESP32 DevKit;ESP32-WROOM-32 DevKit V1;1;8;Steuerung + Datenlogging
+Antrieb & Elektronik;Step-down-Wandler;z. B. LM2596 oder Mini360, auf 5 V eingestellt;1;3;Versorgung ESP32 und Hallsensoren
+Antrieb & Elektronik;Hallsensor A3144;TO-92 (10er-Pack);2 + Reserve;3;Rampenende + Exzenter, VCC an 5 V
+Antrieb & Elektronik;Widerstände 10 kΩ;;2;1;Pull-ups für die Hallsensoren (nach 3V3)
+Antrieb & Elektronik;Widerstand 1 kΩ;;1;0;UART TX → PDN_UART
+Antrieb & Elektronik;Neodym-Magnet 5 × 2 mm;N52, Scheibe;2;3;In den Exzenter kleben (Südpol zum Sensor)
+Antrieb & Elektronik;Neodym-Magnet 10 × 3 mm;N52, Scheibe;2;3;Rampenende (Auslöser)
+Antrieb & Elektronik;Akku 6S LiPo;22,2 V, 1000–1300 mAh, XT60;1;35;"Für 1200 U/min; Akkuwanne ggf. anpassen. Alternative 4S = weniger Drehzahlreserve"
+Antrieb & Elektronik;LiPo-Ladegerät mit Balancer;nur falls nicht vorhanden;1;30;Optional
+Antrieb & Elektronik;Hauptschalter;Kippschalter ≥ 5 A;1;2;
+Antrieb & Elektronik;XT60-Buchse;;1;2;Akkuanschluss
+Antrieb & Elektronik;Lochrasterplatine;50 × 70 mm;1;1;
+Antrieb & Elektronik;Stift- und Buchsenleisten;für ESP32 und TMC2209 steckbar;1 Set;2;
+Antrieb & Elektronik;Schraubklemmen;2-polig, RM 5,08;4;1;Motor, Akku, Sensoren
+Antrieb & Elektronik;Kabel / Litze + Dupont-Kabel;0,25 mm² und 0,75 mm²;1 Set;5;
+Antrieb & Elektronik;Schrumpfschlauch;Sortiment;1;2;
+3D-Druck;Filament PLA oder PETG;ca. 0,6–0,7 kg für alle Teile;1 Rolle;20;Grundplatten, Gabeln, Felgen, Halter
+3D-Druck;Filament TPU 95A;ca. 0,15 kg;1 Rolle;25;3 Reifen
+Versuchsaufbau;Ballastgewichte;gesamt ca. 2,5 kg, in Stufen (z. B. 5 × 0,5 kg);1 Set;10;Tief und nahe der Hinterachse montieren
+Versuchsaufbau;Klettband;20 mm breit;1;2;Akku + Ballast
+Versuchsaufbau;Rampe;Brett/Siebdruckplatte ca. 1,2 × 0,3 m + Unterbau;1;20;Dazu eine glatte, gleichbleibende Auslauffläche
+Versuchsaufbau;Maßband + Markierband;;1;3;Bremsweg ablesen
+Versuchsaufbau;Sekundenkleber / 2K-Kleber;;1;4;Magnete und Muttern fixieren

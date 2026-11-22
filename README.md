@@ -1,56 +1,61 @@
-# Bremsdreirad – ESP32 + TMC2209 mit WLAN-Bedienung
+# Bremsdreirad – gibt es eine ideale Bremsfrequenz?
 
-## WLAN
-Der ESP32 öffnet ein eigenes WLAN – kein Router nötig:
-- **Name:** `Bremsdreirad` · **Passwort:** `physik123` (oben in `main.cpp` änderbar)
-- Handy/Laptop verbinden, dann im Browser **http://192.168.4.1** öffnen
-- Live: gemessene Drehzahl am Exzenter, Zustand beider Hallsensoren, Treiberstatus
-- Knöpfe: STOP, Bremse öffnen, Referenzfahrt, Testlauf, Scharf (Rampe), Feinjustage ±10/±50 Schritte, „als offen speichern“
-- Letzter Bremslauf als Diagramm (Ist- vs. Soll-Frequenz), Tabelle und CSV-Download
+Physik-Versuch: Ein 3D-gedrucktes Dreirad rollt eine Rampe hinunter. Am Rampenende löst ein Hallsensor einen
+**gepulsten Bremsvorgang** am Hinterrad aus (bis 20 Hz). Gemessen wird der Bremsweg in Abhängigkeit von der Bremsfrequenz.
 
-Hinweis: Das Handy meldet evtl. „kein Internet“ – trotzdem verbunden bleiben.
+Die Bremse: Ein NEMA17 dreht einen Exzenter, der über ein Pleuel mit Federhülse den Hebel eines
+Scooter-Scheibenbremssattels (110 mm Scheibe) zieht – pro Umdrehung einmal bremsen, einmal lösen.
 
-PlatformIO-Projekt. In VS Code: **Datei → Ordner öffnen** (diesen Ordner) → PlatformIO lädt die Bibliotheken automatisch.
-Dann **Upload** (Pfeil unten in der Statusleiste) und **Serial Monitor** (Stecker-Symbol), 115200 Baud.
+![Gesamtansicht](hardware/bilder/gesamt.png)
+
+## Inhalt
+
+| Ordner | Was |
+|---|---|
+| `src/`, `platformio.ini` | Firmware für ESP32 + TMC2209 (PlatformIO), mit WLAN-Bedienung |
+| `hardware/cad/` | Parametrisches OpenSCAD-Modell (`bremsdreirad.scad`) |
+| `hardware/stl/` | Alle Druckteile als STL |
+| `hardware/step/` | Gesamte Baugruppe als STEP für Fusion 360 (gezippt) |
+| `hardware/README.md` | Druckhinweise, Kaufteile, Parameter zum Anpassen |
+| `docs/verkabelung.svg` / `.html` | Verdrahtungsschema mit Verbindungslisten |
+| `docs/materialliste.csv` | Materialliste mit geschätzten Preisen |
 
 ## Verkabelung
 
-| ESP32 | TMC2209-Modul | Hinweis |
-|---|---|---|
-| GPIO 25 | STEP | |
-| GPIO 26 | DIR | |
-| GPIO 27 | EN | LOW = an |
-| GPIO 17 (TX2) | PDN_UART | **über 1 kΩ** |
-| GPIO 16 (RX2) | PDN_UART | direkt |
-| 3V3 | VIO / VDD | Logikversorgung |
-| GND | GND (beide) | gemeinsame Masse mit Akku |
-| – | MS1, MS2 → GND | UART-Adresse 0 |
-| – | VM ← Akku + (über Schalter) | **100 µF Elko direkt an VM/GND** |
-| – | A1 A2 B1 B2 → Motor | Spulenpaare mit Multimeter prüfen |
+![Verdrahtungsschema](docs/verkabelung.svg)
 
-| ESP32 | Sensor |
-|---|---|
-| GPIO 32 | A3144 am Exzenter (OUT) |
-| GPIO 33 | A3144 am Rampenende (OUT) |
-| 3V3 / GND | VCC / GND beider Sensoren, OUT je 10 kΩ nach 3V3 |
+Alle Verbindungen als Liste: [`docs/verkabelung.html`](docs/verkabelung.html) (herunterladen und im Browser öffnen).
 
-ESP32 bekommt 5 V über den Step-down-Wandler an VIN.
-**Niemals den Motor ab- oder anstecken, solange VM anliegt** – das zerstört den Treiber.
+**Wichtig:**
+- Step-down **vorher allein** auf 5,0 V einstellen.
+- UART: GPIO 17 **über 1 kΩ** und GPIO 16 direkt an PDN_UART.
+- Hallsensoren A3144 an **5 V** (brauchen ≥ 4,5 V), Ausgänge mit 10 kΩ nach **3V3**.
+- 100 µF Elko direkt an VM/GND des TMC2209.
+- Motor **nie** ab- oder anstecken, solange der Akku dran ist.
 
-## Erste Inbetriebnahme (auf dem Tisch, Bremse zunächst ausgehängt)
+## Firmware
 
-1. `status` → muss „UART-Verbindung: OK“ zeigen.
-2. `i 800` → vorsichtig mit wenig Strom starten.
-3. `home` → Exzenter dreht langsam bis zum Magneten.
-4. Mit `j 50` / `j -50` den Exzenter in die Stellung „Bremse ganz gelöst“ drehen, dann `cal`.
-5. `f 5` und `run` → 3 s Lauf, danach kommt das Log mit echter Frequenz pro Umdrehung.
-6. Frequenz schrittweise bis `f 20` erhöhen. Steht in der Spalte `schrittfehler` mehr als ±80, verliert der Motor Schritte.
-7. Bremse einhängen und Schritt 5–6 wiederholen. Strom ggf. bis `i 1400` erhöhen (Kühlkörper!).
+In VS Code mit der PlatformIO-Erweiterung öffnen → **Upload** → **Serial Monitor** (115200 Baud).
 
-## Messung
+### WLAN
+Der ESP32 öffnet ein eigenes WLAN – kein Router nötig:
+- **Name:** `Bremsdreirad` · **Passwort:** `physik123` (oben in `src/main.cpp` änderbar)
+- Verbinden, dann im Browser **http://192.168.4.1** öffnen (Meldung „kein Internet“ ignorieren)
+- Live: gemessene Drehzahl am Exzenter, Zustand beider Hallsensoren, Treiberstatus
+- Knöpfe: STOP, Bremse öffnen, Referenzfahrt, Testlauf, Scharf (Rampe), Feinjustage, „als offen speichern“
+- Letzter Bremslauf als Diagramm, Tabelle und CSV-Download
 
-`arm` → Dreirad auf die Rampe; der Magnet am Rampenende startet den Bremslauf.
-Das Log (CSV, Trennzeichen `;`) aus dem Seriellen Monitor in eine Tabelle kopieren.
-Nach jedem Lauf fährt der Exzenter automatisch neu in die Referenz und in die gelöste Stellung.
+### Erste Inbetriebnahme (auf dem Tisch, Bremse zunächst ausgehängt)
+1. Status prüfen → „UART: OK“.
+2. Strom auf 800 mA stellen.
+3. **Referenzfahrt** → Exzenter dreht langsam bis zum Magneten.
+4. Mit ±10 / ±50 den Exzenter in „Bremse ganz offen“ drehen → **als offen speichern**.
+5. Frequenz 5 Hz → **Testlauf** → Log ansehen.
+6. Frequenz schrittweise bis 20 Hz erhöhen. Rote Zeilen im Log = Schrittverlust.
+7. Bremse einhängen, 5–6 wiederholen; Strom bei Bedarf bis 1400 mA (Kühlkörper!).
 
-Einstellungen (`f`, `a`, `t`, `i`, `cal`) bleiben nach dem Ausschalten erhalten.
+### Messung
+**Scharf (Rampe)** → Dreirad auf die Rampe; der Magnet am Rampenende startet den Bremslauf.
+Nach jedem Lauf fährt der Exzenter automatisch neu in die Referenz und auf „offen“.
+
+Alle Befehle gehen auch über den Seriellen Monitor (`help`). Einstellungen bleiben nach dem Ausschalten erhalten.
