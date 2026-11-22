@@ -37,6 +37,23 @@ Alle Verbindungen als Liste: [`docs/verkabelung.html`](docs/verkabelung.html) (h
 
 In VS Code mit der PlatformIO-Erweiterung öffnen → **Upload** → **Serial Monitor** (115200 Baud).
 
+Es gibt zwei Programme – unten in der PlatformIO-Statusleiste die Umgebung wählen:
+
+| Umgebung | Datei | Wofür |
+|---|---|---|
+| `env:motortest` | `src/motortest.cpp` | **Zuerst:** nur Motor über WLAN testen, keine Hallsensoren nötig |
+| `env:esp32dev` | `src/main.cpp` | Eigentlicher Versuch mit Hallsensoren, Bremslauf und Log |
+
+### Motortest (ohne Sensoren)
+WLAN `Bremsdreirad` / `physik123`, dann **http://192.168.4.1**:
+- Dauerlauf starten, Frequenz per Schieberegler (auch während der Fahrt), sanft anhalten, NOT-STOP
+- ¼ / 1 Umdrehung vor/zurück, Richtung wechseln, Motor bestromt/stromlos
+- Motorstrom, SpreadCycle/StealthChop umschalten
+- Treiberstatus: UART-Verbindung, Temperatur, Kurzschluss, offene Spule
+- **Drehzahltest:** fährt 2 → 20 Hz in 2-Hz-Stufen (je 2 s) – hören, ab wann der Motor stottert
+
+Empfehlung für den ersten Start: 800 mA, 2 Hz, Hochlauf 50 Hz/s. Kühlkörper auf den TMC2209!
+
 ### WLAN
 Der ESP32 öffnet ein eigenes WLAN – kein Router nötig:
 - **Name:** `Bremsdreirad` · **Passwort:** `physik123` (oben in `src/main.cpp` änderbar)
