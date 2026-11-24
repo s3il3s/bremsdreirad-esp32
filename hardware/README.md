@@ -11,11 +11,12 @@ Gesamtansicht: `part = "assembly"`. Einzelteil: z. B. `part = "pleuel"` setzen u
 | `disc_center_d` | 29 mm | Innenloch der Scheibe (manche Scheiben: 38 mm) |
 | `caliper_hole_dist`, `caliper_bolt_d` | 51 mm, M6 | Lochabstand + Schraubengröße am Bremssattel |
 | `caliper_angle`, `caliper_r` | 150°, 55 mm | Lage des Sattels, so dass die Beläge mittig auf der Reibfläche sitzen |
+| `act_uv`, `lever_tip` | [-26, 10], x = -60 | Drehpunkt des Bremshebels am Sattel und Loch für den Gelenkkopf |
 | `fork_l_in` | 38 mm | Platz zwischen Scheibe und Gabelplatte (Sattelbreite) |
 | `eccentric_e` | 4 mm | Exzentrizität -> Hub = 2·e (STLs für e = 2…6 liegen bei) |
 | `akku` | 76×35×24 | Maße eures Akkus |
 
-**Wichtig:** Den Bremssattel habe ich nur als Platzhalter-Block modelliert, da es viele verschiedene Scooter-Sättel gibt. Die Langlöcher (±7 mm) gleichen etwas aus. Wenn der Sattel eine andere Befestigung hat (z. B. radial statt axial verschraubt), muss `fork_profile()` angepasst werden.
+**Wichtig:** Den Bremssattel habe ich nur grob modelliert (Gehäuse, Beläge, Hebel), da es viele verschiedene Scooter-Sättel gibt. Die Langlöcher (±7 mm) gleichen etwas aus. Wenn der Sattel eine andere Befestigung hat (z. B. radial statt axial verschraubt), muss `fork_profile()` angepasst werden.
 
 ## Druckteile (PLA/PETG, 3 Wände, 25–30 % Infill)
 
@@ -77,3 +78,12 @@ Mit 1 mm Schlauchgummi ergibt das wieder 150 mm Raddurchmesser.
 3. Felgenbett und Gummi anrauen (Schleifpapier), mit Spiritus entfetten.
 4. Mit **Kontaktkleber** (z. B. Pattex) oder Vulkanisierlösung **vollflächig** aufkleben, Enden schräg überlappend stoßen.
 5. Ist euer Schlauch nicht 1 mm dick: `schlauch_t` in der .scad anpassen und Räder neu exportieren.
+
+## Anbindung an den Bremshebel
+
+Die Gewindestange M5 endet in einem **Gelenkkopf M5** (Kugelgelenk, Innengewinde, z. B. igus igubal),
+der mit M5 × 16 und Stoppmutter direkt am Bremshebel verschraubt wird (5-mm-Loch in den Hebel bohren).
+Zwischen Pleuel und Gelenkkopf sitzen zwei Muttern (Vorspannung der Feder, gekontert) und eine Kontermutter am Gelenkkopf.
+Das Pleuel sollte in der Mittelstellung etwa senkrecht zum Hebel ziehen.
+
+![Bremse mit Gelenkkopf](bilder/bremse_gelenkkopf.png)
