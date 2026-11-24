@@ -3,8 +3,9 @@
 Physik-Versuch: Ein 3D-gedrucktes Dreirad rollt eine Rampe hinunter. Am Rampenende löst ein Hallsensor einen
 **gepulsten Bremsvorgang** am Hinterrad aus (bis 20 Hz). Gemessen wird der Bremsweg in Abhängigkeit von der Bremsfrequenz.
 
-Die Bremse: Ein NEMA17 dreht einen Exzenter, der über ein Pleuel mit Federhülse den Hebel eines
-Scooter-Scheibenbremssattels (110 mm Scheibe) zieht – pro Umdrehung einmal bremsen, einmal lösen.
+Die Bremse: Ein NEMA17 dreht einen Exzenter, der über ein Pleuel mit Federhülse, eine M5-Gewindestange und einen
+Gelenkkopf den Hebel eines Scooter-Scheibenbremssattels (110 mm Scheibe) zieht – pro Umdrehung einmal bremsen, einmal lösen.
+Die Räder (150 mm) haben ein flaches Felgenbett, auf das ein Streifen Fahrradschlauch geklebt wird.
 
 ![Gesamtansicht](hardware/bilder/gesamt.png)
 

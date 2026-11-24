@@ -45,6 +45,8 @@ Alle Teile sind so ausgerichtet, dass sie ohne Stützmaterial druckbar sind.
 - 5× M5×12 + Muttern (Bremsscheibe; Muttern von unten in die Taschen schieben, evtl. mit einem Tropfen Kleber fixieren)
 - M4-Schrauben + Muttern (Lochraster 20 mm), M3-Schrauben für den NEMA17, 1× M3-Madenschraube
 - M5-Gewindestange ca. 60 mm, M5-Gabelkopf für den Sattelhebel, 3 Muttern M5, Scheibe DIN 433 (Ø 9 mm)
+- M5-Gewindestange ca. 60 mm, **Gelenkkopf M5** (Innengewinde) + M5 × 16 mit Stoppmutter für den Bremshebel, 3 Muttern M5, Scheibe DIN 433 (Ø 9 mm)
+- Alter Fahrradschlauch + Kontaktkleber für die Laufflächen
 - Druckfeder außen 8–10 mm, innen ≥ 5,5 mm (passt über M5), ca. 20–25 mm lang (Federhülse im Pleuel)
 - 2× M2,5-Schrauben für die Lochrasterplatine 50×70
 - 2× Hallsensor A3144 (Rampenende + Exzenter) + Magnete
