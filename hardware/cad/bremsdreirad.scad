@@ -349,7 +349,8 @@ module hall_arm() {
 // =====================================================================
 rod_cc      = lever_x - motor_x;    // Mittenabstand Exzenter -> Hebel (Darstellung)
 sleeve_len  = 28;
-sleeve_id   = 10.5;                 // Druckfeder bis Aussen-D 10, z.B. 9x0.8x25
+rod_d       = 5;                    // Gewindestange M5
+sleeve_id   = 10.5;                 // Federraum: Druckfeder Aussen-D 8-10, Innen-D >= 5,5 (passt ueber M5)
 sleeve_od   = 16;
 
 module conrod() {
@@ -369,8 +370,8 @@ module conrod() {
         // Federraum + Fenster nach oben (Feder, Scheibe, Mutter einlegen; Federweg sichtbar)
         translate([s0+4, 0, zc]) rotate([0,90,0]) cylinder(d=sleeve_id, h=sleeve_len-7);
         translate([s0+4, -sleeve_id/2, zc]) cube([sleeve_len-7, sleeve_id, h]);
-        // Durchgang M4-Gewindestange im Deckel
-        translate([s0, 0, zc]) rotate([0,90,0]) cylinder(d=4.6, h=sleeve_len+5, $fn=20);
+        // Durchgang Gewindestange im Deckel
+        translate([s0, 0, zc]) rotate([0,90,0]) cylinder(d=rod_d+0.5, h=sleeve_len+5, $fn=24);
     }
 }
 
@@ -471,8 +472,8 @@ module assembly() {
     c("Hallsensor_Arm_Motor", "MediumSeaGreen") hall_arm();
     c("Hallsensor_A3144_Platzhalter", "black") translate([motor_x - 2.25, rod_y + brg2_w/2 + 1.6, motor_z + magnet_r - 2.25]) cube([4.5, 3.6, 4.5]);
     c("Pleuel", "MediumOrchid") translate([motor_x, rod_y + brg2_w/2, motor_z + eccentric_e]) rotate([90,0,0]) conrod();
-    c("Gewindestange_M4", "silver") translate([motor_x + 22, rod_y - 3.5, motor_z + eccentric_e]) rotate([0,90,0])
-        cylinder(d=4, h=rod_cc - 22 + 4);
+    c("Gewindestange_M5", "silver") translate([motor_x + 22, rod_y - 3.5, motor_z + eccentric_e]) rotate([0,90,0])
+        cylinder(d=rod_d, h=rod_cc - 22 + 4);
     c("Elektronik_Traeger", "MediumSeaGreen") translate([78, -8, pz]) electronics_tray();
     c("Platine_Platzhalter", [0.1,0.4,0.15]) translate([78+4, -8+4, pz+10]) cube([76, 56, 1.6]);
     c("ESP32_Platzhalter", [0.1,0.1,0.12]) translate([88, 4, pz+11.6]) cube([52, 28, 3]);

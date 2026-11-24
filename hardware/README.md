@@ -43,8 +43,8 @@ Alle Teile sind so ausgerichtet, dass sie ohne Stützmaterial druckbar sind.
 - 3× Schraube M8 als Achse (hinten M8×100, vorne M8×50) + Muttern
 - 5× M5×12 + Muttern (Bremsscheibe; Muttern von unten in die Taschen schieben, evtl. mit einem Tropfen Kleber fixieren)
 - M4-Schrauben + Muttern (Lochraster 20 mm), M3-Schrauben für den NEMA17, 1× M3-Madenschraube
-- M4-Gewindestange ca. 60 mm, M4-Gabelkopf (Modellbau) für den Sattelhebel
-- Druckfeder Ø ≤ 10 mm, ca. 20–25 mm lang (Federhülse im Pleuel)
+- M5-Gewindestange ca. 60 mm, M5-Gabelkopf für den Sattelhebel, 3 Muttern M5, Scheibe DIN 433 (Ø 9 mm)
+- Druckfeder außen 8–10 mm, innen ≥ 5,5 mm (passt über M5), ca. 20–25 mm lang (Federhülse im Pleuel)
 - 2× M2,5-Schrauben für die Lochrasterplatine 50×70
 - 2× Hallsensor A3144 (Rampenende + Exzenter) + Magnete
 - 1× Neodym-Magnet 5×2 mm, in die Tasche an der Stirnseite des Exzenters kleben (Polung: A3144 schaltet auf Südpol)
@@ -54,7 +54,7 @@ Alle Teile sind so ausgerichtet, dass sie ohne Stützmaterial druckbar sind.
 
 ## Funktion des Pleuels
 
-Im Pleuel steckt eine M4-Gewindestange. Auf ihrem Ende sitzen Mutter und Unterlegscheibe, dazwischen liegt die Feder (bis zum Deckel).
+Im Pleuel steckt eine M5-Gewindestange. Auf ihrem Ende sitzen Mutter und Unterlegscheibe, dazwischen liegt die Feder (bis zum Deckel).
 - **Exzenter zieht (Bremsen):** Der Deckel drückt die Feder zusammen. Die Bremskraft wird durch die Feder begrenzt.
 - **Exzenter schiebt (Lösen):** Der Hülsenboden schiebt die Mutter. Der Hebel wird dadurch zwangsweise zurückgestellt.
 Mit einer zweiten Mutter außen am Deckel stellt ihr die Vorspannung ein.
