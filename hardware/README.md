@@ -23,7 +23,7 @@ Gesamtansicht: `part = "assembly"`. Einzelteil: z. B. `part = "pleuel"` setzen u
 |---|---|---|
 | rad_hinten | 1 | mit Scheibenflansch |
 | rad_vorne | 2 | |
-| reifen | 3 | **TPU** (95A), über die Felge ziehen |
+| reifen_tpu | (3) | nur falls ihr statt Fahrradschlauch TPU-Reifen wollt: in der .scad `belag = "tpu"` setzen und Räder neu exportieren |
 | grundplatte_hinten / _vorne | je 1 | 220 × 120 mm, Druckbett ≥ 220 mm (sonst diagonal legen) |
 | gabel_links (Sattelseite) / gabel_rechts | je 1 | |
 | achsbock_vorne | 2 | zweites Teil im Slicer spiegeln |
@@ -66,3 +66,14 @@ Falls euer Sattel durch **Drücken** bremst, setzt ihr die Feder auf die andere 
 - Da der Exzenter starr gekoppelt ist, bremst das Rad, sobald der Motor dreht. Beim Signal vom Hallsensor muss der Motor also schnell beschleunigen (≈ 0,1 s). Die ersten Pulse haben deshalb noch eine niedrigere Frequenz. Loggt die Schritte mit Zeitstempel mit, dann kennt ihr den genauen Bremsverlauf.
 - Hallsensor am Exzenter: 1 Impuls pro Umdrehung. Damit messt ihr die echte Bremsfrequenz, erkennt Schrittverluste (Schritte pro Impuls zählen) und fahrt vor dem Start die Ruhestellung „gelöst“ an. Den Ausgang an einen Interrupt-Pin des ESP32 mit Pull-up (10 kΩ) legen.
 - Legt etwas Ballast über das Hinterrad (Gewindegrid nutzen). Das gebremste Rad braucht Last, sonst blockiert es sofort.
+
+## Lauffläche aus Fahrradschlauch
+
+Die Räder haben ein flaches Felgenbett (148 mm Ø, 18 mm breit) mit 0,5 mm hohen Bordkanten und flachen Rillen für den Kleber.
+Mit 1 mm Schlauchgummi ergibt das wieder 150 mm Raddurchmesser.
+
+1. Schlauch **längs** in Streifen von **18 mm** Breite schneiden.
+2. Länge ca. **430–440 mm** (Umfang 465 mm, etwas kürzer, damit der Streifen gespannt sitzt).
+3. Felgenbett und Gummi anrauen (Schleifpapier), mit Spiritus entfetten.
+4. Mit **Kontaktkleber** (z. B. Pattex) oder Vulkanisierlösung **vollflächig** aufkleben, Enden schräg überlappend stoßen.
+5. Ist euer Schlauch nicht 1 mm dick: `schlauch_t` in der .scad anpassen und Räder neu exportieren.
