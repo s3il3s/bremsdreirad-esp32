@@ -24,7 +24,12 @@ $fn = 72;
 
 // ---------------- Raeder ----------------
 wheel_d      = 150;   // Aussendurchmesser mit Reifen
-tire_t       = 5;     // Reifendicke (TPU-Ring)
+belag        = "schlauch"; // "schlauch" = aufgeklebter Fahrradschlauch, "tpu" = gedruckter Reifen
+schlauch_t   = 1.0;   // Dicke Schlauchgummi (MESSEN! meist 0,8-1,2 mm)
+riffel       = true;  // flache Rillen im Felgenbett, damit der Kleber besser haelt
+tire_t       = belag == "schlauch" ? schlauch_t : 5;   // Belagdicke
+lip_h        = belag == "schlauch" ? 0.5 : 2;          // Hoehe Bordkante ueber Felgenbett
+lip_w        = 2;     // Breite Bordkante -> Felgenbett = wheel_w - 2*lip_w = 18 mm
 wheel_w      = 22;    // Breite Felge
 bearing_od   = 22;    // 608er Kugellager 8x22x7
 bearing_w    = 7;
@@ -102,10 +107,14 @@ module rim(with_disc=true) {
             translate([0,0,zb]) difference() {
                 union() {
                     cylinder(r=rim_ro, h=wheel_w);
-                    cylinder(r=rim_ro+2, h=2);
-                    translate([0,0,wheel_w-2]) cylinder(r=rim_ro+2, h=2);
+                    cylinder(r=rim_ro+lip_h, h=lip_w);
+                    translate([0,0,wheel_w-lip_w]) cylinder(r=rim_ro+lip_h, h=lip_w);
                 }
                 translate([0,0,-1]) cylinder(r=rim_ri, h=wheel_w+2);
+                // Rillen im Felgenbett (0,3 mm tief) fuer besseren Halt des Klebers
+                if (riffel && belag == "schlauch")
+                    for (z=[lip_w+2 : 3 : wheel_w-lip_w-2]) translate([0,0,z])
+                        difference() { cylinder(r=rim_ro+1, h=1); translate([0,0,-1]) cylinder(r=rim_ro-0.3, h=3); }
             }
             // Speichenscheibe (unten)
             translate([0,0,zb]) difference() {
@@ -131,7 +140,12 @@ module rim(with_disc=true) {
 }
 
 module tire() {
-    difference() {
+    if (belag == "schlauch")   // nur Darstellung: aufgeklebter Schlauchstreifen
+        difference() {
+            cylinder(r=R, h=wheel_w-2*lip_w, center=true);
+            cylinder(r=R-tire_t, h=wheel_w, center=true);
+        }
+    else difference() {
         cylinder(r=R, h=wheel_w-4, center=true);
         cylinder(r=R-tire_t-0.3, h=wheel_w, center=true);
         // Profilrillen
