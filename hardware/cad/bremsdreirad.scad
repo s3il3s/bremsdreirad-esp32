@@ -24,7 +24,12 @@ $fn = 72;
 
 // ---------------- Raeder ----------------
 wheel_d      = 150;   // Aussendurchmesser mit Reifen
-tire_t       = 5;     // Reifendicke (TPU-Ring)
+belag        = "schlauch"; // "schlauch" = aufgeklebter Fahrradschlauch, "tpu" = gedruckter Reifen
+schlauch_t   = 1.0;   // Dicke Schlauchgummi (MESSEN! meist 0,8-1,2 mm)
+riffel       = true;  // flache Rillen im Felgenbett, damit der Kleber besser haelt
+tire_t       = belag == "schlauch" ? schlauch_t : 5;   // Belagdicke
+lip_h        = belag == "schlauch" ? 0.5 : 2;          // Hoehe Bordkante ueber Felgenbett
+lip_w        = 2;     // Breite Bordkante -> Felgenbett = wheel_w - 2*lip_w = 18 mm
 wheel_w      = 22;    // Breite Felge
 bearing_od   = 22;    // 608er Kugellager 8x22x7
 bearing_w    = 7;
@@ -64,7 +69,6 @@ eccentric_e = 4;          // Exzentrizitaet -> Hub = 2*e (Varianten 2..6 drucken
 brg2_od     = 32;         // Lager 6804 (20x32x7) als Pleuelauge
 brg2_id     = 20;
 brg2_w      = 7;
-lever_x     = -72;        // Angriffspunkt am Sattelhebel (nur Darstellung)
 nema        = 42.3;
 // Drehzahl-/Phasensensor am Exzenter
 magnet_d    = 5;          // Neodym-Scheibe 5 x 2 mm
@@ -102,10 +106,14 @@ module rim(with_disc=true) {
             translate([0,0,zb]) difference() {
                 union() {
                     cylinder(r=rim_ro, h=wheel_w);
-                    cylinder(r=rim_ro+2, h=2);
-                    translate([0,0,wheel_w-2]) cylinder(r=rim_ro+2, h=2);
+                    cylinder(r=rim_ro+lip_h, h=lip_w);
+                    translate([0,0,wheel_w-lip_w]) cylinder(r=rim_ro+lip_h, h=lip_w);
                 }
                 translate([0,0,-1]) cylinder(r=rim_ri, h=wheel_w+2);
+                // Rillen im Felgenbett (0,3 mm tief) fuer besseren Halt des Klebers
+                if (riffel && belag == "schlauch")
+                    for (z=[lip_w+2 : 3 : wheel_w-lip_w-2]) translate([0,0,z])
+                        difference() { cylinder(r=rim_ro+1, h=1); translate([0,0,-1]) cylinder(r=rim_ro-0.3, h=3); }
             }
             // Speichenscheibe (unten)
             translate([0,0,zb]) difference() {
@@ -131,7 +139,12 @@ module rim(with_disc=true) {
 }
 
 module tire() {
-    difference() {
+    if (belag == "schlauch")   // nur Darstellung: aufgeklebter Schlauchstreifen
+        difference() {
+            cylinder(r=R, h=wheel_w-2*lip_w, center=true);
+            cylinder(r=R-tire_t, h=wheel_w, center=true);
+        }
+    else difference() {
         cylinder(r=R, h=wheel_w-4, center=true);
         cylinder(r=R-tire_t-0.3, h=wheel_w, center=true);
         // Profilrillen
@@ -174,6 +187,14 @@ module base_plate(rear=true) {
 // =====================================================================
 cal_c = [caliper_r*cos(caliper_angle), R + caliper_r*sin(caliper_angle)];   // (x,z)
 cal_t = caliper_angle - 90;   // Richtung tangential
+
+// Lage im Sattel-Koordinatensystem: u = tangential, v = radial nach aussen (mm)
+function cal_pt(u, v) = cal_c + u*[cos(cal_t), sin(cal_t)] + v*[-sin(cal_t), cos(cal_t)];
+act_uv     = [-26, 10];       // Drehpunkt Bremshebel am Sattel (ANPASSEN an euren Sattel)
+act_p      = cal_pt(act_uv[0], act_uv[1]);
+lever_tip  = [-60, motor_z + eccentric_e];   // Loch im Hebel fuer den Gelenkkopf (auf Hoehe Pleuel)
+lever_x    = lever_tip[0];
+rodend_y   = rod_y - 3.5;     // Mittelebene Gelenkkopf = Ebene der Gewindestange
 
 module fork_profile(with_caliper) {
     difference() {
@@ -335,7 +356,8 @@ module hall_arm() {
 // =====================================================================
 rod_cc      = lever_x - motor_x;    // Mittenabstand Exzenter -> Hebel (Darstellung)
 sleeve_len  = 28;
-sleeve_id   = 10.5;                 // Druckfeder bis Aussen-D 10, z.B. 9x0.8x25
+rod_d       = 5;                    // Gewindestange M5
+sleeve_id   = 10.5;                 // Federraum: Druckfeder Aussen-D 8-10, Innen-D >= 5,5 (passt ueber M5)
 sleeve_od   = 16;
 
 module conrod() {
@@ -355,8 +377,8 @@ module conrod() {
         // Federraum + Fenster nach oben (Feder, Scheibe, Mutter einlegen; Federweg sichtbar)
         translate([s0+4, 0, zc]) rotate([0,90,0]) cylinder(d=sleeve_id, h=sleeve_len-7);
         translate([s0+4, -sleeve_id/2, zc]) cube([sleeve_len-7, sleeve_id, h]);
-        // Durchgang M4-Gewindestange im Deckel
-        translate([s0, 0, zc]) rotate([0,90,0]) cylinder(d=4.6, h=sleeve_len+5, $fn=20);
+        // Durchgang Gewindestange im Deckel
+        translate([s0, 0, zc]) rotate([0,90,0]) cylinder(d=rod_d+0.5, h=sleeve_len+5, $fn=24);
     }
 }
 
@@ -416,14 +438,57 @@ module disc_dummy() {
         for (i=[0:7]) rotate(i*45+20) translate([38,0,-1]) cylinder(d=7, h=5);
     }
 }
-module caliper_dummy() {
-    color([0.15,0.15,0.15,0.85]) translate([cal_c[0], disc_offset - 9, cal_c[1]])
-        rotate([0, -cal_t, 0]) translate([-24, 0, -14]) cube([48, fork_l_in - disc_offset + 9, 28]);
-    // Hebel
-    color("orange") hull() {
-        translate([cal_c[0]-10, rod_y-3.5, cal_c[1]+10]) rotate([90,0,0]) cylinder(d=8, h=4, center=true);
-        translate([lever_x, rod_y-3.5, motor_z+eccentric_e]) rotate([90,0,0]) cylinder(d=8, h=4, center=true);
+// ---------------- grobes Modell eines mechanischen Scooter-Bremssattels ----------------
+// Nur zur Darstellung / Kollisionspruefung. Masse eures Sattels messen und anpassen.
+module in_cal() translate([cal_c[0], 0, cal_c[1]]) rotate([0, -cal_t, 0]) children();   // x=u, z=v
+module ybox(u0, u1, v0, v1, y0, y1) translate([u0, y0, v0]) cube([u1-u0, y1-y0, v1-v0]);
+module ycyl(u, v, r, y0, y1) translate([u, y1, v]) rotate([90,0,0]) cylinder(r=r, h=y1-y0);
+
+module caliper_body() {
+    in_cal() difference() {
+        union() {
+            hull() { ybox(-22, 22, -14, 6, 25.2, 35); ycyl(-22, -8, 4, 25.2, 35); ycyl(22, -8, 4, 25.2, 35); }  // aussen (Gabelseite)
+            hull() { ybox(-18, 18, -13, 6, 13, 20.6); }                                                     // innen
+            ybox(-18, 18, 1.5, 6, 13, 35);                                                                  // Bruecke ueber die Scheibe
+            for (u=[-1,1]) hull() { ycyl(u*caliper_hole_dist/2, 0, 6, 30, 38); ycyl(u*18, 0, 6, 30, 35); } // Befestigungsaugen
+            hull() { ycyl(act_uv[0], act_uv[1], 7, 25.2, 30.5); ycyl(-18, 0, 6, 25.2, 30.5); }               // Lagerbock Hebelwelle
+        }
+        for (u=[-1,1]) ycyl(u*caliper_hole_dist/2, 0, caliper_bolt_d/2, 20, 40);
+        ycyl(act_uv[0], act_uv[1], 2.5, 20, 40);
     }
+}
+module caliper_pads() in_cal() for (y=[[20.6, 21.9], [23.9, 25.2]]) ybox(-13, 13, -12, -1, y[0], y[1]);
+
+module brake_lever() {   // Hebel liegt aussen auf dem Lagerbock, y 30,5..34,5
+    difference() {
+        hull() {
+            translate([act_p[0], 34.5, act_p[1]]) rotate([90,0,0]) cylinder(r=6, h=4);
+            translate([lever_tip[0], 34.5, lever_tip[1]]) rotate([90,0,0]) cylinder(r=5, h=4);
+        }
+        translate([lever_tip[0], 40, lever_tip[1]]) rotate([90,0,0]) cylinder(d=5.3, h=20);   // 5-mm-Loch fuer den Gelenkkopf
+    }
+    translate([act_p[0], 36, act_p[1]]) rotate([90,0,0]) cylinder(r=2.5, h=12);              // Hebelwelle
+}
+
+// Gelenkkopf M5 (Innengewinde), z.B. igus igubal: Gehaeuse 16 mm, Breite 8 mm, Schaft nach -x
+module rod_end() {
+    tx = lever_tip[0]; tz = lever_tip[1];
+    difference() {
+        union() {
+            translate([tx, rodend_y + 4, tz]) rotate([90,0,0]) cylinder(d=16, h=8);
+            translate([tx - 16, rodend_y, tz]) rotate([0,90,0]) cylinder(d=9, h=10);
+        }
+        translate([tx, rodend_y, tz]) sphere(d=10.5);
+        translate([tx - 17, rodend_y, tz]) rotate([0,90,0]) cylinder(d=rod_d, h=9);
+    }
+    translate([tx, rodend_y, tz]) difference() { sphere(d=10); rotate([90,0,0]) cylinder(d=5.2, h=20, center=true); }
+}
+module rod_end_bolt() translate([lever_tip[0], 38, lever_tip[1]]) rotate([90,0,0]) {
+    cylinder(d=5, h=16); cylinder(d=8.5, h=3);                              // M5x16
+    translate([0,0,15]) cylinder(r=4.6, h=5, $fn=6);                        // Stoppmutter
+}
+module m5_nut_x(x) translate([x, rodend_y, motor_z + eccentric_e]) rotate([0,90,0]) rotate(30) difference() {
+    cylinder(r=4.6, h=4, $fn=6); translate([0,0,-1]) cylinder(d=rod_d, h=6);
 }
 
 // =====================================================================
@@ -441,7 +506,12 @@ module assembly() {
         c(s>0 ? "Reifen_vorne_links" : "Reifen_vorne_rechts", "DimGray") translate([wheelbase, yc, R]) rotate([-90,0,0]) tire();
     }
     c("Bremsscheibe_Platzhalter", "silver") disc_dummy();
-    c("Bremssattel_Platzhalter", "black") caliper_dummy();
+    c("Bremssattel_Platzhalter", [0.22,0.22,0.24]) caliper_body();
+    c("Bremsbelaege_Platzhalter", "SaddleBrown") caliper_pads();
+    c("Bremshebel_Platzhalter", "Silver") brake_lever();
+    c("Gelenkkopf_M5", "Orange") rod_end();
+    c("Schraube_Gelenkkopf_M5", "DarkGray") rod_end_bolt();
+    c("Muttern_M5", "DarkGray") { m5_nut_x(motor_x + 46); m5_nut_x(motor_x + 50); m5_nut_x(lever_tip[0] - 20); }
     c("Grundplatte_hinten", "Gainsboro") base_plate(true);
     c("Grundplatte_vorne", "LightGray") base_plate(false);
     c("Gabel_links", "Tomato") fork(true);
@@ -457,8 +527,8 @@ module assembly() {
     c("Hallsensor_Arm_Motor", "MediumSeaGreen") hall_arm();
     c("Hallsensor_A3144_Platzhalter", "black") translate([motor_x - 2.25, rod_y + brg2_w/2 + 1.6, motor_z + magnet_r - 2.25]) cube([4.5, 3.6, 4.5]);
     c("Pleuel", "MediumOrchid") translate([motor_x, rod_y + brg2_w/2, motor_z + eccentric_e]) rotate([90,0,0]) conrod();
-    c("Gewindestange_M4", "silver") translate([motor_x + 22, rod_y - 3.5, motor_z + eccentric_e]) rotate([0,90,0])
-        cylinder(d=4, h=rod_cc - 22 + 4);
+    c("Gewindestange_M5", "silver") translate([motor_x + 22, rod_y - 3.5, motor_z + eccentric_e]) rotate([0,90,0])
+        cylinder(d=rod_d, h=rod_cc - 22 - 9);
     c("Elektronik_Traeger", "MediumSeaGreen") translate([78, -8, pz]) electronics_tray();
     c("Platine_Platzhalter", [0.1,0.4,0.15]) translate([78+4, -8+4, pz+10]) cube([76, 56, 1.6]);
     c("ESP32_Platzhalter", [0.1,0.1,0.12]) translate([88, 4, pz+11.6]) cube([52, 28, 3]);

@@ -11,11 +11,12 @@ Gesamtansicht: `part = "assembly"`. Einzelteil: z. B. `part = "pleuel"` setzen u
 | `disc_center_d` | 29 mm | Innenloch der Scheibe (manche Scheiben: 38 mm) |
 | `caliper_hole_dist`, `caliper_bolt_d` | 51 mm, M6 | Lochabstand + Schraubengröße am Bremssattel |
 | `caliper_angle`, `caliper_r` | 150°, 55 mm | Lage des Sattels, so dass die Beläge mittig auf der Reibfläche sitzen |
+| `act_uv`, `lever_tip` | [-26, 10], x = -60 | Drehpunkt des Bremshebels am Sattel und Loch für den Gelenkkopf |
 | `fork_l_in` | 38 mm | Platz zwischen Scheibe und Gabelplatte (Sattelbreite) |
 | `eccentric_e` | 4 mm | Exzentrizität -> Hub = 2·e (STLs für e = 2…6 liegen bei) |
 | `akku` | 76×35×24 | Maße eures Akkus |
 
-**Wichtig:** Den Bremssattel habe ich nur als Platzhalter-Block modelliert, da es viele verschiedene Scooter-Sättel gibt. Die Langlöcher (±7 mm) gleichen etwas aus. Wenn der Sattel eine andere Befestigung hat (z. B. radial statt axial verschraubt), muss `fork_profile()` angepasst werden.
+**Wichtig:** Den Bremssattel habe ich nur grob modelliert (Gehäuse, Beläge, Hebel), da es viele verschiedene Scooter-Sättel gibt. Die Langlöcher (±7 mm) gleichen etwas aus. Wenn der Sattel eine andere Befestigung hat (z. B. radial statt axial verschraubt), muss `fork_profile()` angepasst werden.
 
 ## Druckteile (PLA/PETG, 3 Wände, 25–30 % Infill)
 
@@ -23,7 +24,7 @@ Gesamtansicht: `part = "assembly"`. Einzelteil: z. B. `part = "pleuel"` setzen u
 |---|---|---|
 | rad_hinten | 1 | mit Scheibenflansch |
 | rad_vorne | 2 | |
-| reifen | 3 | **TPU** (95A), über die Felge ziehen |
+| reifen_tpu | (3) | nur falls ihr statt Fahrradschlauch TPU-Reifen wollt: in der .scad `belag = "tpu"` setzen und Räder neu exportieren |
 | grundplatte_hinten / _vorne | je 1 | 220 × 120 mm, Druckbett ≥ 220 mm (sonst diagonal legen) |
 | gabel_links (Sattelseite) / gabel_rechts | je 1 | |
 | achsbock_vorne | 2 | zweites Teil im Slicer spiegeln |
@@ -43,8 +44,9 @@ Alle Teile sind so ausgerichtet, dass sie ohne Stützmaterial druckbar sind.
 - 3× Schraube M8 als Achse (hinten M8×100, vorne M8×50) + Muttern
 - 5× M5×12 + Muttern (Bremsscheibe; Muttern von unten in die Taschen schieben, evtl. mit einem Tropfen Kleber fixieren)
 - M4-Schrauben + Muttern (Lochraster 20 mm), M3-Schrauben für den NEMA17, 1× M3-Madenschraube
-- M4-Gewindestange ca. 60 mm, M4-Gabelkopf (Modellbau) für den Sattelhebel
-- Druckfeder Ø ≤ 10 mm, ca. 20–25 mm lang (Federhülse im Pleuel)
+- M5-Gewindestange ca. 60 mm, **Gelenkkopf M5** (Innengewinde) + M5 × 16 mit Stoppmutter für den Bremshebel, 3 Muttern M5, Scheibe DIN 433 (Ø 9 mm)
+- Alter Fahrradschlauch + Kontaktkleber für die Laufflächen
+- Druckfeder außen 8–10 mm, innen ≥ 5,5 mm (passt über M5), ca. 20–25 mm lang (Federhülse im Pleuel)
 - 2× M2,5-Schrauben für die Lochrasterplatine 50×70
 - 2× Hallsensor A3144 (Rampenende + Exzenter) + Magnete
 - 1× Neodym-Magnet 5×2 mm, in die Tasche an der Stirnseite des Exzenters kleben (Polung: A3144 schaltet auf Südpol)
@@ -54,7 +56,7 @@ Alle Teile sind so ausgerichtet, dass sie ohne Stützmaterial druckbar sind.
 
 ## Funktion des Pleuels
 
-Im Pleuel steckt eine M4-Gewindestange. Auf ihrem Ende sitzen Mutter und Unterlegscheibe, dazwischen liegt die Feder (bis zum Deckel).
+Im Pleuel steckt eine M5-Gewindestange. Auf ihrem Ende sitzen Mutter und Unterlegscheibe, dazwischen liegt die Feder (bis zum Deckel).
 - **Exzenter zieht (Bremsen):** Der Deckel drückt die Feder zusammen. Die Bremskraft wird durch die Feder begrenzt.
 - **Exzenter schiebt (Lösen):** Der Hülsenboden schiebt die Mutter. Der Hebel wird dadurch zwangsweise zurückgestellt.
 Mit einer zweiten Mutter außen am Deckel stellt ihr die Vorspannung ein.
@@ -66,3 +68,23 @@ Falls euer Sattel durch **Drücken** bremst, setzt ihr die Feder auf die andere 
 - Da der Exzenter starr gekoppelt ist, bremst das Rad, sobald der Motor dreht. Beim Signal vom Hallsensor muss der Motor also schnell beschleunigen (≈ 0,1 s). Die ersten Pulse haben deshalb noch eine niedrigere Frequenz. Loggt die Schritte mit Zeitstempel mit, dann kennt ihr den genauen Bremsverlauf.
 - Hallsensor am Exzenter: 1 Impuls pro Umdrehung. Damit messt ihr die echte Bremsfrequenz, erkennt Schrittverluste (Schritte pro Impuls zählen) und fahrt vor dem Start die Ruhestellung „gelöst“ an. Den Ausgang an einen Interrupt-Pin des ESP32 mit Pull-up (10 kΩ) legen.
 - Legt etwas Ballast über das Hinterrad (Gewindegrid nutzen). Das gebremste Rad braucht Last, sonst blockiert es sofort.
+
+## Lauffläche aus Fahrradschlauch
+
+Die Räder haben ein flaches Felgenbett (148 mm Ø, 18 mm breit) mit 0,5 mm hohen Bordkanten und flachen Rillen für den Kleber.
+Mit 1 mm Schlauchgummi ergibt das wieder 150 mm Raddurchmesser.
+
+1. Schlauch **längs** in Streifen von **18 mm** Breite schneiden.
+2. Länge ca. **430–440 mm** (Umfang 465 mm, etwas kürzer, damit der Streifen gespannt sitzt).
+3. Felgenbett und Gummi anrauen (Schleifpapier), mit Spiritus entfetten.
+4. Mit **Kontaktkleber** (z. B. Pattex) oder Vulkanisierlösung **vollflächig** aufkleben, Enden schräg überlappend stoßen.
+5. Ist euer Schlauch nicht 1 mm dick: `schlauch_t` in der .scad anpassen und Räder neu exportieren.
+
+## Anbindung an den Bremshebel
+
+Die Gewindestange M5 endet in einem **Gelenkkopf M5** (Kugelgelenk, Innengewinde, z. B. igus igubal),
+der mit M5 × 16 und Stoppmutter direkt am Bremshebel verschraubt wird (5-mm-Loch in den Hebel bohren).
+Zwischen Pleuel und Gelenkkopf sitzen zwei Muttern (Vorspannung der Feder, gekontert) und eine Kontermutter am Gelenkkopf.
+Das Pleuel sollte in der Mittelstellung etwa senkrecht zum Hebel ziehen.
+
+![Bremse mit Gelenkkopf](bilder/bremse_gelenkkopf.png)
