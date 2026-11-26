@@ -7,6 +7,8 @@
  *    Frequenz waehrend des Laufs aendern, Richtung, Schrittweise drehen
  *  - Treiber: Strom, SpreadCycle/StealthChop, UART-Verbindung, Temperatur- und Fehlerflags
  *  - Drehzahltest: faehrt automatisch 2 -> 20 Hz in Stufen hoch (hoeren, ab wann er stottert)
+ *  - Hallsensor an GPIO 33: misst die tatsaechliche Drehzahl (1 Magnet = 1 Impuls pro Umdrehung),
+ *    zeigt Schritte pro Umdrehung (Schrittverlust) und eine Anzeige, die bei Magnet gruen wird
  *
  * In VS Code unten in der PlatformIO-Leiste die Umgebung "env:motortest" waehlen, dann Upload.
  * Fuer das eigentliche Programm wieder "env:esp32dev" waehlen.
@@ -27,6 +29,7 @@ constexpr int PIN_DIR     = 26;
 constexpr int PIN_EN      = 27;   // LOW = Treiber an
 constexpr int PIN_UART_RX = 16;   // direkt an PDN_UART
 constexpr int PIN_UART_TX = 17;   // ueber 1 kOhm an PDN_UART
+constexpr int PIN_HALL    = 33;   // A3144: VCC 5 V, OUT mit 10 kOhm nach 3V3, LOW bei Magnet
 
 constexpr float    R_SENSE        = 0.11f;
 constexpr uint8_t  DRIVER_ADDRESS = 0;
@@ -55,6 +58,63 @@ constexpr float    SWEEP_START = 2, SWEEP_END = 20, SWEEP_STEP = 2;
 constexpr uint32_t SWEEP_HOLD_MS = 2000;
 
 String lastMsg = "Bereit.";
+
+// ---------------- Hallsensor ----------------
+volatile uint32_t hallCount = 0;      // Impulse seit Start / Reset
+volatile uint32_t hallLastUs = 0;
+volatile uint32_t hallPeriodUs = 0;
+constexpr int HALL_AVG = 4;           // Mittelwert ueber die letzten Perioden
+uint32_t periods[HALL_AVG] = {0};
+uint8_t  periodIdx = 0, periodN = 0;
+uint32_t seenCount = 0;
+int32_t  lastPulsePos = 0;
+int32_t  stepsPerPulse = 0;           // gemessene Schritte zwischen zwei Impulsen (Soll: STEPS_PER_REV)
+bool     havePulsePos = false;
+
+void IRAM_ATTR isrHall() {
+  uint32_t now = micros();
+  uint32_t dt = now - hallLastUs;
+  if (dt > 3000) {                    // Entprellen: max. ~330 Impulse/s
+    hallPeriodUs = dt;
+    hallLastUs = now;
+    hallCount = hallCount + 1;
+  }
+}
+
+// gemessene Drehzahl in Hz (0, wenn der Magnet zu lange nicht vorbeikam)
+float hallHz() {
+  if (periodN == 0) return 0;
+  uint32_t sum = 0;
+  for (int k = 0; k < periodN; k++) sum += periods[k];
+  float avg = (float)sum / periodN;
+  uint32_t since = micros() - hallLastUs;
+  if (since > 1500000UL || since > 2.5f * avg) return 0;
+  return 1e6f / avg;
+}
+
+void handleHallPulses() {
+  uint32_t cnt = hallCount;
+  if (cnt == seenCount) return;
+  bool consecutive = (cnt == seenCount + 1);
+  seenCount = cnt;
+  uint32_t pulseUs = hallLastUs, per = hallPeriodUs;
+  // Motorposition auf den Zeitpunkt des Impulses zurueckrechnen
+  float sps = stepper->getCurrentSpeedInMilliHz() / 1000.0f;
+  int32_t pos = stepper->getCurrentPosition() - (int32_t)(sps * (micros() - pulseUs) / 1e6f);
+  if (havePulsePos && consecutive && per < 2000000UL) {
+    stepsPerPulse = abs(pos - lastPulsePos);
+    periods[periodIdx] = per; periodIdx = (periodIdx + 1) % HALL_AVG;
+    if (periodN < HALL_AVG) periodN++;
+  } else if (!consecutive) {
+    periodN = 0;                      // Impulse verpasst -> Mittelwert neu beginnen
+  }
+  lastPulsePos = pos; havePulsePos = true;
+}
+
+void resetHall() {
+  noInterrupts(); hallCount = 0; hallPeriodUs = 0; interrupts();
+  seenCount = 0; periodN = 0; periodIdx = 0; stepsPerPulse = 0; havePulsePos = false;
+}
 
 // ---------------- Treiber ----------------
 void applyDriver() {
@@ -146,6 +206,7 @@ String handleCommand(String line) {
     if (stepper->isRunning()) return "Erst anhalten.";
     stepper->disableOutputs(); enabled = false; return "Motor stromlos (frei drehbar).";
   }
+  if (cmd == "hallreset") { resetHall(); return "Hall-Zaehler zurueckgesetzt."; }
   if (cmd == "sweep") {
     sweepActive = true; sweepHz = SWEEP_START; sweepNextMs = millis() + SWEEP_HOLD_MS;
     startRun(sweepHz);
@@ -172,13 +233,25 @@ button{flex:1;min-width:110px;padding:13px;border:0;border-radius:10px;backgroun
 label{display:block;margin:10px 0 2px;font-weight:600}input[type=range]{width:100%}
 .val{float:right;font-weight:700}#msg{font:13px ui-monospace,monospace;color:#6b7280;min-height:1.2em}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.kv span:nth-child(odd){color:#6b7280}
-.bad{color:#dc2626;font-weight:700}.good{color:#16a34a;font-weight:700}
+.bad{color:#dc2626;font-weight:700}
+#lamp{border-radius:12px;padding:22px;text-align:center;font-size:20px;font-weight:700;background:#e5e7eb;color:#6b7280;transition:background .08s}
+#lamp.on{background:#16a34a;color:#fff}.good{color:#16a34a;font-weight:700}
 </style></head><body>
 <header><b>Motortest</b><span id="st">…</span></header><main>
 <div class="card"><h2>Live</h2><div class="big">
-<div><span id="ist">–</span><small>Ist (Hz)</small></div>
-<div><span id="rpm">–</span><small>U/min</small></div>
+<div><span id="ist">–</span><small>Soll Motor (Hz)</small></div>
+<div><span id="hhz">–</span><small>Ist Hallsensor (Hz)</small></div>
 <div><span id="pos">–</span><small>Umdrehungen</small></div></div></div>
+
+<div class="card"><h2>Hallsensor (GPIO 33)</h2>
+<div id="lamp">kein Magnet</div>
+<div class="kv" style="margin-top:10px">
+<span>Impulse</span><span id="hcnt">–</span>
+<span>U/min gemessen</span><span id="hrpm">–</span>
+<span>Schritte je Umdrehung</span><span id="hspp">–</span>
+<span>Abweichung Soll/Ist</span><span id="hdev">–</span></div>
+<div class="row"><button class="sec" onclick="c('hallreset')">Zähler zurücksetzen</button></div>
+<small style="color:#6b7280">Bleibt das Feld beim Vorbeiführen grau: Magnet umdrehen (der A3144 reagiert nur auf den Südpol an der beschrifteten Seite).</small></div>
 
 <div class="card"><h2>Fahren</h2>
 <div class="row"><button class="stop" onclick="c('notstop')">NOT-STOP</button><button class="wa" onclick="c('stop')">Sanft anhalten</button></div>
@@ -199,12 +272,18 @@ label{display:block;margin:10px 0 2px;font-weight:600}input[type=range]{width:10
 <div class="row"><button class="sec" onclick="c('on')">Motor bestromt</button><button class="sec" onclick="c('off')">Motor stromlos</button></div>
 <div class="kv" id="drv"></div></div>
 </main><script>
-const $=id=>document.getElementById(id);let busy=false;
+const $=id=>document.getElementById(id);let busy=false,lastCnt=-1,flashUntil=0;
 async function c(x){const r=await fetch('/cmd?c='+encodeURIComponent(x));$('msg').textContent=await r.text();poll();}
 function setR(id,v,u){const e=$(id);if(document.activeElement!==e){e.value=v;$(id+'v').textContent=v+u;}}
 async function poll(){if(busy)return;busy=true;try{const s=await(await fetch('/status')).json();
 $('st').textContent=s.running?(s.sweep?'Drehzahltest '+s.sweepHz+' Hz':'läuft'):'steht';
-$('ist').textContent=s.hz.toFixed(2);$('rpm').textContent=Math.round(s.hz*60);$('pos').textContent=s.rev.toFixed(2);
+$('ist').textContent=s.hz.toFixed(2);$('hhz').textContent=s.hhz.toFixed(2);$('pos').textContent=s.rev.toFixed(2);
+if(lastCnt>=0&&s.hcnt!==lastCnt)flashUntil=Date.now()+180;lastCnt=s.hcnt;
+const on=s.hnow||Date.now()<flashUntil;$('lamp').className=on?'on':'';$('lamp').textContent=on?'Magnet erkannt':'kein Magnet';
+$('hcnt').textContent=s.hcnt;$('hrpm').textContent=Math.round(s.hhz*60);
+$('hspp').textContent=s.hspp?s.hspp+' (Soll '+s.spr+')':'–';
+if(s.hspp&&s.running){const d=s.hspp-s.spr,bad=Math.abs(d)>s.spr/20;$('hdev').innerHTML=`<span class="${bad?'bad':'good'}">${d>0?'+':''}${d} Schritte${bad?' – Schrittverlust!':''}</span>`;}
+else $('hdev').textContent='–';
 setR('f',s.f,' Hz');setR('a',s.a,' Hz/s');setR('i',s.i,' mA');
 const F=(b,t,f)=>b?`<span class="bad">${t}</span>`:`<span class="good">${f}</span>`;
 $('drv').innerHTML=`<span>UART</span>${s.uart?'<span class="good">OK</span>':'<span class="bad">keine Verbindung – 1 kΩ / PDN_UART prüfen</span>'}
@@ -214,7 +293,7 @@ $('drv').innerHTML=`<span>UART</span>${s.uart?'<span class="good">OK</span>':'<s
 <span>Spule offen</span>${F(s.ol&&s.running,'JA – Motorkabel prüfen!','nein')}
 <span>Motor</span><span>${s.en?'bestromt':'stromlos'} · ${s.fwd?'vorwärts':'rückwärts'}</span>`;
 }catch(e){$('st').textContent='keine Verbindung';}busy=false;}
-setInterval(poll,500);poll();
+setInterval(poll,200);poll();
 </script></body></html>)HTML";
 
 bool drvUart = false, drvOt = false, drvOtpw = false, drvS2g = false, drvOl = false;
@@ -236,14 +315,17 @@ void webStatus() {
   if (millis() - drvCheckedMs > 1000) checkDriver();
   float hz = stepper->getCurrentSpeedInMilliHz() / 1000.0f / STEPS_PER_REV;
   float rev = (float)stepper->getCurrentPosition() / STEPS_PER_REV;
-  char buf[420];
+  char buf[600];
   snprintf(buf, sizeof buf,
     "{\"running\":%s,\"sweep\":%s,\"sweepHz\":%.0f,\"hz\":%.3f,\"rev\":%.3f,\"f\":%.1f,\"a\":%.0f,\"i\":%u,"
-    "\"spread\":%s,\"en\":%s,\"fwd\":%s,\"uart\":%s,\"ot\":%s,\"otpw\":%s,\"s2g\":%s,\"ol\":%s,\"irms\":%u}",
+    "\"spread\":%s,\"en\":%s,\"fwd\":%s,\"uart\":%s,\"ot\":%s,\"otpw\":%s,\"s2g\":%s,\"ol\":%s,\"irms\":%u,"
+    "\"hhz\":%.3f,\"hnow\":%s,\"hcnt\":%lu,\"hspp\":%ld,\"spr\":%lu}",
     stepper->isRunning() ? "true" : "false", sweepActive ? "true" : "false", sweepHz, fabsf(hz), rev,
     freqHz, accelHzPerS, currentMa, spreadCycle ? "true" : "false", enabled ? "true" : "false",
     forward ? "true" : "false", drvUart ? "true" : "false", drvOt ? "true" : "false",
-    drvOtpw ? "true" : "false", drvS2g ? "true" : "false", drvOl ? "true" : "false", drvIrms);
+    drvOtpw ? "true" : "false", drvS2g ? "true" : "false", drvOl ? "true" : "false", drvIrms,
+    hallHz(), digitalRead(PIN_HALL) == LOW ? "true" : "false", (unsigned long)hallCount,
+    (long)stepsPerPulse, (unsigned long)STEPS_PER_REV);
   server.send(200, "application/json", buf);
 }
 
@@ -263,6 +345,9 @@ void setup() {
   stepper->setAutoEnable(false);
   stepper->enableOutputs();
 
+  pinMode(PIN_HALL, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PIN_HALL), isrHall, FALLING);
+
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASS);
   WiFi.setSleep(false);
@@ -278,11 +363,12 @@ void setup() {
   checkDriver();
   Serial.printf("WLAN '%s' (Passwort %s) -> http://%s\n", AP_SSID, AP_PASS, WiFi.softAPIP().toString().c_str());
   Serial.printf("UART zum TMC2209: %s\n", drvUart ? "OK" : "FEHLER");
-  Serial.println("Befehle auch hier: run, stop, notstop, f <Hz>, a <Hz/s>, i <mA>, j <Umdr.>, dir, mode, on, off, sweep");
+  Serial.println("Befehle auch hier: run, stop, notstop, f <Hz>, a <Hz/s>, i <mA>, j <Umdr.>, dir, mode, on, off, sweep, hallreset");
 }
 
 void loop() {
   server.handleClient();
+  handleHallPulses();
 
   static String line;
   while (Serial.available()) {

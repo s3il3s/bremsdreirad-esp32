@@ -52,6 +52,7 @@ WLAN `Bremsdreirad` / `physik123`, dann **http://192.168.4.1**:
 - Motorstrom, SpreadCycle/StealthChop umschalten
 - Treiberstatus: UART-Verbindung, Temperatur, Kurzschluss, offene Spule
 - **Drehzahltest:** fährt 2 → 20 Hz in 2-Hz-Stufen (je 2 s) – hören, ab wann der Motor stottert
+- **Hallsensor an GPIO 33 (optional):** misst die tatsächliche Drehzahl über den Magneten im Exzenter, zeigt Schritte pro Umdrehung (Schrittverlust) und ein Feld, das bei Magnet grün wird – so lässt sich die Magnet-Orientierung prüfen
 
 Empfehlung für den ersten Start: 800 mA, 2 Hz, Hochlauf 50 Hz/s. Kühlkörper auf den TMC2209!
 
